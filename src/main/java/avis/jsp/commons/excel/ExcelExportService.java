@@ -10,7 +10,6 @@ import javax.servlet.ServletRequest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.rmi.server.ExportException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -97,7 +96,7 @@ public class ExcelExportService {
             workbook.close();
             
             System.out.println("Excel file has been generated.");
-        } catch(ExportException e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
         
