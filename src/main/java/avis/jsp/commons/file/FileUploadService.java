@@ -45,8 +45,8 @@ public class FileUploadService implements ServletRequest {
     // Responses
     private Map<String, String> parameters = new HashMap<>();
     private Map<String, List<String>> parameterValues = new HashMap<>();
-    private Map<String, FileHandle> handlers = new HashMap<>();
-    private Map<String, File> uploadedFiles = new HashMap<>();
+    private Map<String, List<FileHandle>> handlers = new HashMap<>();
+    private Map<String, List<File>> uploadedFiles = new HashMap<>();
     
     // Encoding
     private String encodingFrom;
@@ -106,7 +106,7 @@ public class FileUploadService implements ServletRequest {
             List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory(DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD, tempDir)).parseRequest(request);
     
             Map<String, List<String>> parameterValues = new HashMap<>();
-            Map<String, FileHandle> handlers = new HashMap<>();
+            Map<String, List<FileHandle>> handlers = new HashMap<>();
     
             for(int i = 0; i < items.size(); i++) {
                 FileItem item = items.get(i);
@@ -137,8 +137,11 @@ public class FileUploadService implements ServletRequest {
                     handle.inputStream = item.getInputStream();
                     
                     System.out.println("File Input: " + item.getFieldName() + " -> " + handle.fileName);
-                    
-                    handlers.put(item.getFieldName(), handle);
+    
+                    if(!handlers.containsKey(item.getFieldName())) {
+                        handlers.put(item.getFieldName(), new ArrayList<>());
+                    }
+                    handlers.get(item.getFieldName()).add(handle);
                 }
             }
     
@@ -176,24 +179,30 @@ public class FileUploadService implements ServletRequest {
         this.uploadedFiles = uploadFile(imPath);
     }
     
-    private Map<String, File> uploadFile(String imPath) throws IOException {
-        Map<String, File> uploadedFiles = new HashMap<>();
-        for(Map.Entry<String, FileHandle> entry : handlers.entrySet()) {
-            FileHandle handle = entry.getValue();
-        
-            try(OutputStream outputStream = new FileOutputStream(imPath + handle.fileName)) {
-                int read = 0;
-                byte[] bytes = new byte[1024];
-                while((read = handle.inputStream.read(bytes)) != -1) {
-                    outputStream.write(bytes, 0, read);
-                }
-            
-                uploadedFiles.put(entry.getKey(), new File(imPath + handle.fileName));
-            } catch(IOException e) {
-                e.printStackTrace();
-            } finally {
-                if(handle.inputStream != null) {
-                    handle.inputStream.close();
+    private Map<String, List<File>> uploadFile(String imPath) throws IOException {
+        Map<String, List<File>> uploadedFiles = new HashMap<>();
+        for(Map.Entry<String, List<FileHandle>> entry : handlers.entrySet()) {
+            List<FileHandle> handlers = entry.getValue();
+            for(FileHandle handle : handlers) {
+                try(OutputStream outputStream = new FileOutputStream(imPath + handle.fileName)) {
+                    int read = 0;
+                    byte[] bytes = new byte[1024];
+                    while((read = handle.inputStream.read(bytes)) != -1) {
+                        outputStream.write(bytes, 0, read);
+                    }
+                    
+                    System.out.println(imPath + handle.fileName);
+                    
+                    if(!uploadedFiles.containsKey(entry.getKey())) {
+                        uploadedFiles.put(entry.getKey(), new ArrayList<>());
+                    }
+                    uploadedFiles.get(entry.getKey()).add(new File(imPath + handle.fileName));
+                } catch(IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if(handle.inputStream != null) {
+                        handle.inputStream.close();
+                    }
                 }
             }
         }
@@ -387,7 +396,12 @@ public class FileUploadService implements ServletRequest {
     }
     
     public File getFileContent(String key) {
-        return uploadedFiles.get(key);
+        List<File> fileList = uploadedFiles.get(key);
+        return fileList != null ? fileList.iterator().next() : null;
+    }
+    
+    public Map<String, List<File>> getUploadedFiles() {
+        return uploadedFiles;
     }
     
     public String getFileName(String key) {
@@ -405,8 +419,8 @@ public class FileUploadService implements ServletRequest {
     }
     
     public void deleteFiles() {
-        for(File file : uploadedFiles.values()) {
-            file.delete();
+        for(List<File> files : uploadedFiles.values()) {
+            files.forEach(File::delete);
         }
         uploadedFiles.clear();
     }
