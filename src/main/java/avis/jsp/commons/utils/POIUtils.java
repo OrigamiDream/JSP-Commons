@@ -16,24 +16,24 @@ public class POIUtils {
         if(cell == null) {
             return null;
         } else {
-            switch(cell.getCellTypeEnum()) {
-                case FORMULA:
+            switch(cell.getCellType()) {
+                case HSSFCell.CELL_TYPE_FORMULA:
                     value = cell.getCellFormula();
                     break;
-                
-                case NUMERIC:
+        
+                case HSSFCell.CELL_TYPE_NUMERIC:
                     value = String.valueOf(cell.getNumericCellValue());
                     break;
-                
-                case STRING:
+        
+                case HSSFCell.CELL_TYPE_STRING:
                     value = cell.getStringCellValue();
                     break;
-                
-                case BOOLEAN:
+        
+                case HSSFCell.CELL_TYPE_BOOLEAN:
                     value = String.valueOf(cell.getBooleanCellValue());
                     break;
-                
-                case ERROR:
+        
+                case HSSFCell.CELL_TYPE_ERROR:
                     value = String.valueOf(cell.getErrorCellValue());
                     break;
             }
@@ -46,24 +46,24 @@ public class POIUtils {
         if(cell == null) {
             return null;
         } else {
-            switch(cell.getCellTypeEnum()) {
-                case FORMULA:
+            switch(cell.getCellType()) {
+                case XSSFCell.CELL_TYPE_FORMULA:
                     value = cell.getCellFormula();
                     break;
-        
-                case NUMERIC:
+                    
+                case XSSFCell.CELL_TYPE_NUMERIC:
                     value = String.valueOf(cell.getNumericCellValue());
                     break;
-        
-                case STRING:
+                    
+                case XSSFCell.CELL_TYPE_STRING:
                     value = cell.getStringCellValue();
                     break;
-        
-                case BOOLEAN:
+                    
+                case XSSFCell.CELL_TYPE_BOOLEAN:
                     value = String.valueOf(cell.getBooleanCellValue());
                     break;
-        
-                case ERROR:
+                    
+                case XSSFCell.CELL_TYPE_ERROR:
                     value = String.valueOf(cell.getErrorCellValue());
                     break;
             }
